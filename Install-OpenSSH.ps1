@@ -13,7 +13,7 @@ $AdminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
 $IsAdmin = $UserPrincipal.IsInRole($AdminRole)
 
 if ($IsAdmin) {
-    Write-Output "Script is running elevated." -ForegroundColor Green
+    Write-Host "Script is running elevated." -ForegroundColor Green
 }
 else {
     throw "Script is not running elevated, which is required. Restart the script from an elevated prompt."

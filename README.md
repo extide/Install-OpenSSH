@@ -13,7 +13,8 @@ This script will perform the following actions:
 * Create a firewall rule to allow connection to the service remotely
 * Sets the default shell to powershell
 * Ensures that the permissionf or the Host keys and User keys of current user are correct
-  * This simply executes the FixHostFilePermissions.ps1 and FixUserFilePermissions.ps1 scripts included int he OpenSSH download
+  * This simply executes the FixHostFilePermissions.ps1 and FixUserFilePermissions.ps1 scripts included in the OpenSSH download
+* No mess will be left behind, all temporary downloaded files are automatically cleaned up.
 
 # Configurable Options
 
@@ -64,7 +65,7 @@ There are also 32-bit releases published to this repo -- so if you are attemptin
 
 #### To quickly install with all defaults, just paste this into an admin powershell window:
 
-    cd $env:temp; Invoke-WebRequest -Uri https://raw.githubusercontent.com/extide/Install-OpenSSH/main/Install-OpenSSH.ps1 -OutFile Install-OpenSSH.ps1; .\Install-OpenSSH.ps1
+`cd $env:temp; Invoke-WebRequest -Uri https://raw.githubusercontent.com/extide/Install-OpenSSH/main/Install-OpenSSH.ps1 -OutFile Install-OpenSSH.ps1; .\Install-OpenSSH.ps1`
 
 NOTE: You should *always* examine the powershell script yourself before running it in an admin prompt!
 #### Detailed install instructions

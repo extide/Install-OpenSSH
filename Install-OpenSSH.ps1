@@ -38,6 +38,7 @@ Write-Host "Requesting URL for latest version of OpenSSH" -ForegroundColor Green
 $request = [System.Net.WebRequest]::Create($GitUrl)
 $request.AllowAutoRedirect = $false
 $response = $request.GetResponse()
+if ($null -eq $response) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
 $OpenSSHURL = $([String]$response.GetResponseHeader("Location")).Replace('tag', 'download') + "/" + $GitZipName
 
 #Download and extract archive

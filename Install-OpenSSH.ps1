@@ -43,10 +43,16 @@ Write-Host "Running Install Commands"
 Set-Location $InstallPath
 powershell.exe -ExecutionPolicy Bypass -File install-sshd.ps1
 Set-Service -Name sshd -StartupType 'Automatic'
-Copy-Item -Path $InstallPath\sshd_config_default -Destination $env:ProgramData\ssh\sshd_config -Force
 
-#Set sshd_config
+#Make sure your ProgramData\ssh directory exists
+If (!(Test-Path $env:ProgramData\ssh)) {
+    Write-Host "Creating ProgramData\ssh directory"
+    New-Item -ItemType Directory -Force -Path $env:ProgramData\ssh | Out-Null
+}
+
+#Setup sshd_config
 Write-Host "Configure server config file"
+Copy-Item -Path $InstallPath\sshd_config_default -Destination $env:ProgramData\ssh\sshd_config -Force
 Add-Content -Path $env:ProgramData\ssh\sshd_config -Value "GSSAPIAuthentication yes"
 if ($DisablePasswordAuthentication) { Add-Content -Path $env:ProgramData\ssh\sshd_config -Value "PasswordAuthentication no" }
 if ($DisablePubkeyAuthentication) { Add-Content -Path $env:ProgramData\ssh\sshd_config -Value "PubkeyAuthentication no" }

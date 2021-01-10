@@ -4,7 +4,7 @@ I was trying to configure a bunch of Windows Servers to be able to ssh into them
 
 This script will perform the following actions:
 
-* Find the latest release from the [PowerShell/Win32-OpenSSH](https://github.com/PowerShell/Win32-OpenSS) repo, and download it
+* Find the latest release from the [PowerShell/Win32-OpenSSH](https://github.com/PowerShell/Win32-OpenSSH) repo, and download it
 * Removes existing installations of the Windows OpenSSH Server and Client
 * Add's the OpenSSH install directory (defaults to C:\Program Files\OpenSSH) to the PATH if it is not already there
 * Configure the server for GSSAPIAuthentication(Kerberos) login

@@ -37,13 +37,14 @@ Write-Host "Requesting URL for latest version of OpenSSH" -ForegroundColor Green
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $request = [System.Net.WebRequest]::Create($GitUrl)
 $request.AllowAutoRedirect = $false
+$request.Timeout = 5
 $response = $request.GetResponse()
 if ($null -eq $response) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
 $OpenSSHURL = $([String]$response.GetResponseHeader("Location")).Replace('tag', 'download') + "/" + $GitZipName
 
 #Download and extract archive
 Write-Host "Downloading Archive" -ForegroundColor Green
-Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName -ErrorAction Stop
+Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName -ErrorAction Stop -TimeoutSec 5
 Write-Host "Download Complete, now expanding and copying to destination" -ForegroundColor Green -ErrorAction Stop
 Expand-Archive $GitZipName -DestinationPath . -Force -ErrorAction Stop
 Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue

@@ -1,4 +1,5 @@
 # Install-OpenSSH
+
 I was trying to configure a bunch of Windows Servers to be able to ssh into them using Kerberos, without any password prompts. (Of course this is assuming both the client and server are connected to the same domain, or truested domains) After some googling I was surprised to find out that there isn't a ton of information available on how to do this. Unfortuantely the version of OpenSSH (7.7) that is included with Windows 10 and Windows Server 2019 does not support GSSAPIAuthentication. So to make this work, a newer version of OpenSSH was required. I was not able to find any existing scripts that would "cleanly" do this -- so I decided to make one. Please feel free to create an issue if you have problems, or even submit a pull request if you have made any improvements. This script has, so far, only been tested on Windows 10 20H2 and Windows Server 2019 -- but it should work (possibly requiring some minor modifications) on 2016, and 2012 R2 and possibly 2012 as well. The script is reasonably well documented, so it should be fairly obvious what each section is doing.
 
 

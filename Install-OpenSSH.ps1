@@ -19,7 +19,6 @@ else {
     throw "Script is not running elevated, which is required. Restart the script from an elevated prompt."
 }
 
-
 #Remove BuiltIn OpenSSH
 Write-Host "Checking for Windows OpenSSH Server" -ForegroundColor Green
 if ($(Get-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0).State -eq "Installed") {

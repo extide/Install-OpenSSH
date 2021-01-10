@@ -59,9 +59,6 @@ The filename of the release to download
 Defaults to `OpenSSH-Win64.zip`
 
 There are also 32-bit releases published to this repo -- so if you are attempting to install this on a 32bit system you will want to change this to `OpenSSH-Win32.zip`
-
-
-
 # How to use
 
 #### To quickly install with all defaults, just paste this into an admin powershell window

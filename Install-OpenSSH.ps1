@@ -41,7 +41,7 @@ $OpenSSHURL = $([String]$response.GetResponseHeader("Location")).Replace('tag', 
 
 #Download and extract archive
 Write-Host "Downloading Archive" -ForegroundColor Green
-Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName
+Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName -ErrorAction Stop
 Write-Host "Download Complete, now expanding and copying to destination" -ForegroundColor Green
 Expand-Archive $GitZipName -DestinationPath . -Force -ErrorAction Stop
 Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue

@@ -63,7 +63,7 @@ There are also 32-bit releases published to this repo -- so if you are attemptin
 
 #### To quickly install with all defaults, just paste this into an admin powershell window
 
-`cd $env:temp; Invoke-WebRequest -Uri https://raw.githubusercontent.com/extide/Install-OpenSSH/main/Install-OpenSSH.ps1 -OutFile Install-OpenSSH.ps1 -Force; .\Install-OpenSSH.ps1`
+`cd $env:temp; Invoke-WebRequest -Uri https://raw.githubusercontent.com/extide/Install-OpenSSH/main/Install-OpenSSH.ps1 -OutFile Install-OpenSSH.ps1; .\Install-OpenSSH.ps1`
 
 NOTE: You should *always* examine the powershell script yourself before running it in an admin prompt!
 #### Custom install instructions

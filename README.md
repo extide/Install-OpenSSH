@@ -25,11 +25,12 @@ Below are the configurable options, modifyable by editing the script and changin
     $InstallPath = "C:\Program Files\OpenSSH"
     $DisablePasswordAuthentication = $True
     $DisablePubkeyAuthentication = $True
-    #These ones probably should not change
-    $GitUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/'
-    $GitZipName = "OpenSSH-Win64.zip"
-
-Feel free to change any of them as you see fit, but you probably don't want to change $GitUrl or $GitZipName unless you know what you are doing :)
+    $AutoStartSSHD = $true
+    $AutoStartSSHAGENT = $false
+    $GitUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/    '
+    $GitZipName = "OpenSSH-Win64.zip" # Can use OpenSSH-Win32.zip on older systems
+    $ErrorActionPreference = "Stop" # Do not change this one!
+    $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
 
 #### $InstallPath
 
@@ -47,7 +48,18 @@ Defaults to $True
 If set to $True then Public Key Authentication will be disabled in the sshd_config
 
 Defaults to $True
+#### $AutoStartSSHD
+If set to $true, then sshd service will be configured for Automatic Start
 
+If set to $false, then sshd will be set to manual start
+
+Defaults to $true
+#### $AutoStartSSHAGENT
+If set to $true, then sshd service will be configured for Automatic Start
+
+If set to $false, then sshd will be set to manual start
+
+Defaults to $false
 #### $GitUrl
 The URL to the Git Repo releases list
 
@@ -58,7 +70,13 @@ The filename of the release to download
 
 Defaults to `OpenSSH-Win64.zip`
 
-There are also 32-bit releases published to this repo -- so if you are attempting to install this on a 32bit system you will want to change this to `OpenSSH-Win32.zip`
+There are also 32-bit releases published to their repo -- so if you are attempting to install this on a 32bit system you will want to change this to `OpenSSH-Win32.zip`
+
+#### $UserAgent
+THe useragent to use when making web requests. You can update this if needed. 
+
+Defaults to the Chrome 87 User Agent string.
+
 # How to use
 
 #### To quickly install with all defaults, just paste this into an admin powershell window

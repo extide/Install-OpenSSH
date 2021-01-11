@@ -32,26 +32,54 @@ if ($(Get-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0).State -eq "
     Remove-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0 -ErrorAction SilentlyContinue
 }
 
+#Stop and remove existing services (Perhaps an exisitng OpenSSH install)
+if (Get-Service sshd -ErrorAction SilentlyContinue) {
+    Remove-Service sshd -ErrorAction SilentlyContinue
+    Stop-Service sshd -ErrorAction SilentlyContinue
+}
+if (Get-Service ssh-agent -ErrorAction SilentlyContinue) {
+    Remove-Service ssh-agent -ErrorAction SilentlyContinue
+    Stop-Service ssh-agent -ErrorAction SilentlyContinue
+}
+
+#Randomize Querystring to ensure our request isnt served from a cache
+$GitUrl += "?random=" + $(Get-Random -Minimum 10000 -Maximum 99999)
+
 # Get Upstream URL
 Write-Host "Requesting URL for latest version of OpenSSH" -ForegroundColor Green
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $request = [System.Net.WebRequest]::Create($GitUrl)
 $request.AllowAutoRedirect = $false
-$request.Timeout = 20
-$response = $request.GetResponse()
-if ($null -eq $response) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
+$request.Timeout = 5 * 1000
+$request.headers.Add("Pragma", "no-cache")
+$request.headers.Add("Cache-Control", "no-cache")
+#if ($null -eq $response -or $null -eq $([String]$response.GetResponseHeader("Location"))) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
 $OpenSSHURL = $([String]$response.GetResponseHeader("Location")).Replace('tag', 'download') + "/" + $GitZipName
+
+#Also randomize this one...
+$OpenSSHURL += "?random=" + $(Get-Random -Minimum 10000 -Maximum 99999)
 
 #Download and extract archive
 Write-Host "Downloading Archive" -ForegroundColor Green
-Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName -ErrorAction Stop -TimeoutSec 20
+Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName -ErrorAction Stop -TimeoutSec 5 -Headers @{"Pragma" = "no-cache"; "Cache-Control" = "no-cache"; }
 Write-Host "Download Complete, now expanding and copying to destination" -ForegroundColor Green -ErrorAction Stop
-Expand-Archive $GitZipName -DestinationPath . -Force -ErrorAction Stop
-Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue
 Remove-Item -Path $InstallPath -Force -Recurse -ErrorAction SilentlyContinue
-New-Item -Path $InstallPath -ItemType "directory" -ErrorAction Stop | Out-Null
-Move-Item -Path .\OpenSSH-Win64\* -Destination $InstallPath -ErrorAction Stop
-Remove-Item -Path .\OpenSSH-Win64 -Force -ErrorAction SilentlyContinue
+If (!(Test-Path $InstallPath)) {
+    New-Item -Path $InstallPath -ItemType "directory" -ErrorAction Stop | Out-Null
+}
+[Environment]::CurrentDirectory = $(Get-Location)
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [System.IO.Compression.ZipFile]::OpenRead($GitZipName)
+$archive.Entries | ForEach-Object {
+    # Entries with an empty Name property are directories
+    if ($_.Name -ne '') {
+        $NewFIleName = Join-Path $InstallPath $_.Name
+        Remove-Item -Path $NewFIleName -Force -ErrorAction SilentlyContinue
+        [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, $NewFIleName)
+    }
+}
+
+#Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue
 
 #Do Install
 Write-Host "Running Install Commands" -ForegroundColor Green
@@ -108,5 +136,5 @@ New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server (sshd)' -Enabled Tru
 
 #Set Shell to powershell
 Write-Host "Setting default shell to powershell" -ForegroundColor Green
-New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force -ErrorAction Stop
-Write-Hos "Installation completed successfully" -ForegroundColor Green
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force -ErrorAction Stop | Out-Null
+Write-Host "Installation completed successfully" -ForegroundColor Green

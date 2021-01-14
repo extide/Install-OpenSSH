@@ -27,6 +27,7 @@ Below are the configurable options, modifyable by editing the script and changin
     $DisablePubkeyAuthentication = $True
     $AutoStartSSHD = $true
     $AutoStartSSHAGENT = $false
+    $OpenSSHLocation = $null
     $GitUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/    '
     $GitZipName = "OpenSSH-Win64.zip" # Can use OpenSSH-Win32.zip on older systems
     $ErrorActionPreference = "Stop" # Do not change this one!
@@ -37,6 +38,7 @@ Below are the configurable options, modifyable by editing the script and changin
 The target install directory
 
 Defaults to "C:\Program Files\OpenSSH"
+
 #### $DisablePasswordAuthentication
 
 If set to $True then Password Authentication will be disabled in the sshd_config
@@ -48,24 +50,40 @@ Defaults to $True
 If set to $True then Public Key Authentication will be disabled in the sshd_config
 
 Defaults to $True
+
 #### $AutoStartSSHD
+
 If set to $true, then sshd service will be configured for Automatic Start
 
 If set to $false, then sshd will be set to manual start
 
 Defaults to $true
+
 #### $AutoStartSSHAGENT
+
 If set to $true, then sshd service will be configured for Automatic Start
 
 If set to $false, then sshd will be set to manual start
 
 Defaults to $false
+
+#### $OpenSSHLocation
+
+If left as $null the script will attempt to determine the newest version of OpenSSH and download the archive.
+
+If you specify a path to an exising zip downloaded from the OpenSSH github, it will use that zip file.
+
+* Must be a full path including the filename
+* Any path that is accessable in the context of that powershell session is acceptable, UNC, mapped SMB, or local.
+
 #### $GitUrl
+
 The URL to the Git Repo releases list
 
 Defaults to https://github.com/PowerShell/Win32-OpenSSH/releases/latest/
 
 #### $GitZipName
+
 The filename of the release to download
 
 Defaults to `OpenSSH-Win64.zip`
@@ -73,6 +91,7 @@ Defaults to `OpenSSH-Win64.zip`
 There are also 32-bit releases published to their repo -- so if you are attempting to install this on a 32bit system you will want to change this to `OpenSSH-Win32.zip`
 
 #### $UserAgent
+
 THe useragent to use when making web requests. You can update this if needed. 
 
 Defaults to the Chrome 87 User Agent string.
@@ -84,6 +103,7 @@ Defaults to the Chrome 87 User Agent string.
 `cd $env:temp; Invoke-WebRequest -Uri https://raw.githubusercontent.com/extide/Install-OpenSSH/main/Install-OpenSSH.ps1 -OutFile Install-OpenSSH.ps1; .\Install-OpenSSH.ps1`
 
 NOTE: You should *always* examine the powershell script yourself before running it in an admin prompt!
+
 #### Custom install instructions
 
 * Open an Administrative powershell
@@ -92,3 +112,8 @@ NOTE: You should *always* examine the powershell script yourself before running 
   * Change any options as you see fit
 * Execute the script by typing `.\Install-OpenSSH.ps1`
 * You may need to reboot if the original Windows OpenSSH stuff was installed
+
+
+#### 1/13/21 Update
+
+* Added option to use a locally downloaded zip file to isntall from. This is handy if you are installing to a bunch of machines at a single location and the download links tend to throttle you.

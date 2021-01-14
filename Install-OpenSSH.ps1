@@ -4,6 +4,7 @@ $DisablePasswordAuthentication = $True
 $DisablePubkeyAuthentication = $True
 $AutoStartSSHD = $true
 $AutoStartSSHAGENT = $false
+$OpenSSHLocation = $null    #Set to a local path or accesible UNC path to use exisitng zip and not try to download it each time
 #These ones probably should not change
 $GitUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/'
 $GitZipName = "OpenSSH-Win64.zip" #Can use OpenSSH-Win32.zip on older systems
@@ -44,32 +45,43 @@ if (Get-Service ssh-agent -ErrorAction SilentlyContinue) {
     sc.exe delete ssh-agent 1>$null
 }
 
-#Randomize Querystring to ensure our request isnt served from a cache
-$GitUrl += "?random=" + $(Get-Random -Minimum 10000 -Maximum 99999)
+if ($OpenSSHLocation.Length -eq 0) {
+    #Randomize Querystring to ensure our request isnt served from a cache
+    $GitUrl += "?random=" + $(Get-Random -Minimum 10000 -Maximum 99999)
 
-# Get Upstream URL
-Write-Host "Requesting URL for latest version of OpenSSH" -ForegroundColor Green
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$request = [System.Net.WebRequest]::Create($GitUrl)
-$request.AllowAutoRedirect = $false
-$request.Timeout = 5 * 1000
-$request.headers.Add("Pragma", "no-cache")
-$request.headers.Add("Cache-Control", "no-cache")
-$request.UserAgent = $UserAgent
-#if ($null -eq $response -or $null -eq $([String]$response.GetResponseHeader("Location"))) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
-$OpenSSHURL = $([String]$response.GetResponseHeader("Location")).Replace('tag', 'download') + "/" + $GitZipName
+    # Get Upstream URL
+    Write-Host "Requesting URL for latest version of OpenSSH" -ForegroundColor Green
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $request = [System.Net.WebRequest]::Create($GitUrl)
+    $request.AllowAutoRedirect = $false
+    $request.Timeout = 5 * 1000
+    $request.headers.Add("Pragma", "no-cache")
+    $request.headers.Add("Cache-Control", "no-cache")
+    $request.UserAgent = $UserAgent
+    #if ($null -eq $response -or $null -eq $([String]$response.GetResponseHeader("Location"))) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
+    $OpenSSHURL = $([String]$response.GetResponseHeader("Location")).Replace('tag', 'download') + "/" + $GitZipName
 
-# #Also randomize this one...
-$OpenSSHURL += "?random=" + $(Get-Random -Minimum 10000 -Maximum 99999)
+    # #Also randomize this one...
+    $OpenSSHURL += "?random=" + $(Get-Random -Minimum 10000 -Maximum 99999)
 
-# #Download and extract archive
-Write-Host "Downloading Archive" -ForegroundColor Green
-Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName -ErrorAction Stop -TimeoutSec 5 -Headers @{"Pragma" = "no-cache"; "Cache-Control" = "no-cache"; } -UserAgent $UserAgent
-Write-Host "Download Complete, now expanding and copying to destination" -ForegroundColor Green -ErrorAction Stop
+    # #Download and extract archive
+    Write-Host "Downloading Archive" -ForegroundColor Green
+    Invoke-WebRequest -Uri $OpenSSHURL -OutFile $GitZipName -ErrorAction Stop -TimeoutSec 5 -Headers @{"Pragma" = "no-cache"; "Cache-Control" = "no-cache"; } -UserAgent $UserAgent
+    Write-Host "Download Complete, now expanding and copying to destination" -ForegroundColor Green -ErrorAction Stop
+}
+else {
+    $PathInfo = [System.Uri]([string]::":FileSystem::" + $OpenSSHLocation)
+    if ($PathInfo.IsUnc) {
+        Copy-Item -Path $PathInfo.LocalPath -Destination $env:TEMP
+        Set-Location $env:TEMP
+    }
+}
+
 Remove-Item -Path $InstallPath -Force -Recurse -ErrorAction SilentlyContinue
 If (!(Test-Path $InstallPath)) {
     New-Item -Path $InstallPath -ItemType "directory" -ErrorAction Stop | Out-Null
 }
+
 # $OldEnv = [Environment]::CurrentDirectory
 [Environment]::CurrentDirectory = $(Get-Location)
 Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -85,8 +97,8 @@ $archive.Entries | ForEach-Object {
 $archive.Dispose()
 [Environment]::CurrentDirectory = $env:temp
 
-#Cleanup zip file
-Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue
+#Cleanup zip file if we downloaded it
+if ($OpenSSHLocation.Length -gt 0) { Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue }
 
 #Run Install Script
 Write-Host "Running Install Commands" -ForegroundColor Green

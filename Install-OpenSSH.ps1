@@ -115,7 +115,7 @@ If (!(Test-Path $env:ProgramData\ssh)) {
 #Setup sshd_config
 Write-Host "Configure server config file" -ForegroundColor Green
 Copy-Item -Path $InstallPath\sshd_config_default -Destination $env:ProgramData\ssh\sshd_config -Force -ErrorAction Stop
-Add-Content -Path $env:ProgramData\ssh\sshd_config -Value "GSSAPIAuthentication yes" -ErrorAction Stop
+Add-Content -Path $env:ProgramData\ssh\sshd_config -Value "`r`nGSSAPIAuthentication yes" -ErrorAction Stop
 if ($DisablePasswordAuthentication) { Add-Content -Path $env:ProgramData\ssh\sshd_config -Value "PasswordAuthentication no" -ErrorAction Stop }
 if ($DisablePubkeyAuthentication) { Add-Content -Path $env:ProgramData\ssh\sshd_config -Value "PubkeyAuthentication no" -ErrorAction Stop }
 
@@ -127,7 +127,7 @@ If (!(Test-Path "~\.ssh")) {
 
 #Set ssh_config
 Write-Host "Configure client config file" -ForegroundColor Green
-Add-Content -Path ~\.ssh\config -Value "GSSAPIAuthentication yes" -ErrorAction Stop
+Add-Content -Path ~\.ssh\config -Value "`r`nGSSAPIAuthentication yes" -ErrorAction Stop
 
 #Setting autostarts
 if ($AutoStartSSHD) {

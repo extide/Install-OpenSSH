@@ -4,7 +4,11 @@ $DisablePasswordAuthentication = $True
 $DisablePubkeyAuthentication = $True
 $AutoStartSSHD = $true
 $AutoStartSSHAGENT = $false
-$OpenSSHLocation = $null    #Set to a local path or accesible UNC path to use exisitng zip and not try to download it each time
+
+#Set to a local path or accesible UNC path to use exisitng zip and not try to download it each time
+$OpenSSHLocation = $null
+#$OpenSSHLocation = '\\server\c$\OpenSSH\OpenSSH-Win64.zip'
+
 #These ones probably should not change
 $GitUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/'
 $GitZipName = "OpenSSH-Win64.zip" #Can use OpenSSH-Win32.zip on older systems
@@ -24,6 +28,7 @@ else {
 }
 
 #Remove BuiltIn OpenSSH
+$ErrorActionPreference = "SilentlyContinue"
 Write-Host "Checking for Windows OpenSSH Server" -ForegroundColor Green
 if ($(Get-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0).State -eq "Installed") {
     Write-Host "Removing Windows OpenSSH Server" -ForegroundColor Green
@@ -34,6 +39,7 @@ if ($(Get-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0).State -eq "
     Write-Host "Removing Windows OpenSSH Client" -ForegroundColor Green
     Remove-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0 -ErrorAction SilentlyContinue
 }
+$ErrorActionPreference = "Stop"
 
 #Stop and remove existing services (Perhaps an exisitng OpenSSH install)
 if (Get-Service sshd -ErrorAction SilentlyContinue) {
@@ -58,11 +64,15 @@ if ($OpenSSHLocation.Length -eq 0) {
     $request.headers.Add("Pragma", "no-cache")
     $request.headers.Add("Cache-Control", "no-cache")
     $request.UserAgent = $UserAgent
-    #if ($null -eq $response -or $null -eq $([String]$response.GetResponseHeader("Location"))) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
+    $response = $request.GetResponse()
+    if ($null -eq $response -or $null -eq $([String]$response.GetResponseHeader("Location"))) { throw "Unable to download OpenSSH Archive. Sometimes you can get throttled, so just try again later." }
     $OpenSSHURL = $([String]$response.GetResponseHeader("Location")).Replace('tag', 'download') + "/" + $GitZipName
 
     # #Also randomize this one...
     $OpenSSHURL += "?random=" + $(Get-Random -Minimum 10000 -Maximum 99999)
+    Write-Host "Using URL" -ForegroundColor Green
+    Write-Host $OpenSSHURL -ForegroundColor Green
+    Write-Host
 
     # #Download and extract archive
     Write-Host "Downloading Archive" -ForegroundColor Green
@@ -82,7 +92,7 @@ If (!(Test-Path $InstallPath)) {
     New-Item -Path $InstallPath -ItemType "directory" -ErrorAction Stop | Out-Null
 }
 
-# $OldEnv = [Environment]::CurrentDirectory
+$OldEnv = [Environment]::CurrentDirectory
 [Environment]::CurrentDirectory = $(Get-Location)
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [System.IO.Compression.ZipFile]::OpenRead($GitZipName)
@@ -95,10 +105,10 @@ $archive.Entries | ForEach-Object {
     }
 }
 $archive.Dispose()
-[Environment]::CurrentDirectory = $env:temp
+Set-Location $OldEnv
 
 #Cleanup zip file if we downloaded it
-if ($OpenSSHLocation.Length -gt 0) { Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue }
+if ($OpenSSHURL.Length -gt 0) { Remove-Item -Path $GitZipName -Force -ErrorAction SilentlyContinue }
 
 #Run Install Script
 Write-Host "Running Install Commands" -ForegroundColor Green

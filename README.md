@@ -13,7 +13,7 @@ This script will perform the following actions:
 * Enable GSSAPIAuthentication in the client config for the current user
 * Create a firewall rule to allow connection to the service remotely
 * Sets the default shell to powershell
-* Ensures that the permissionf or the Host keys and User keys of current user are correct
+* Ensures that the permission for the Host keys and User keys of current user are correct
   * This simply executes the FixHostFilePermissions.ps1 and FixUserFilePermissions.ps1 scripts included in the OpenSSH download
 * No mess will be left behind, all temporary downloaded files are automatically cleaned up.
 
@@ -28,30 +28,30 @@ Below are the configurable options, modifyable by editing the script and changin
     $AutoStartSSHD = $true
     $AutoStartSSHAGENT = $false
     $OpenSSHLocation = $null
-    $GitUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/    '
+    $GitUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/'
     $GitZipName = "OpenSSH-Win64.zip" # Can use OpenSSH-Win32.zip on older systems
     $ErrorActionPreference = "Stop" # Do not change this one!
-    $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
+    $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
-#### $InstallPath
+### $InstallPath
 
 The target install directory
 
 Defaults to "C:\Program Files\OpenSSH"
 
-#### $DisablePasswordAuthentication
+### $DisablePasswordAuthentication
 
 If set to $True then Password Authentication will be disabled in the sshd_config
 
 Defaults to $True
 
-#### $DisablePubkeyAuthentication
+### $DisablePubkeyAuthentication
 
 If set to $True then Public Key Authentication will be disabled in the sshd_config
 
 Defaults to $True
 
-#### $AutoStartSSHD
+### $AutoStartSSHD
 
 If set to $true, then sshd service will be configured for Automatic Start
 
@@ -59,7 +59,7 @@ If set to $false, then sshd will be set to manual start
 
 Defaults to $true
 
-#### $AutoStartSSHAGENT
+### $AutoStartSSHAGENT
 
 If set to $true, then sshd service will be configured for Automatic Start
 
@@ -67,7 +67,7 @@ If set to $false, then sshd will be set to manual start
 
 Defaults to $false
 
-#### $OpenSSHLocation
+### $OpenSSHLocation
 
 If left as $null the script will attempt to determine the newest version of OpenSSH and download the archive.
 
@@ -76,13 +76,13 @@ If you specify a path to an exising zip downloaded from the OpenSSH github, it w
 * Must be a full path including the filename
 * Any path that is accessable in the context of that powershell session is acceptable, UNC, mapped SMB, or local.
 
-#### $GitUrl
+### $GitUrl
 
 The URL to the Git Repo releases list
 
 Defaults to https://github.com/PowerShell/Win32-OpenSSH/releases/latest/
 
-#### $GitZipName
+### $GitZipName
 
 The filename of the release to download
 
@@ -90,11 +90,12 @@ Defaults to `OpenSSH-Win64.zip`
 
 There are also 32-bit releases published to their repo -- so if you are attempting to install this on a 32bit system you will want to change this to `OpenSSH-Win32.zip`
 
-#### $UserAgent
+### $UserAgent
 
-THe useragent to use when making web requests. You can update this if needed. 
+The useragent to use when making web requests. You can update this if needed. 
 
-Defaults to the Chrome 87 User Agent string.
+Defaults to the Chrome 91 User Agent string.
+
 
 # How to use
 
@@ -116,4 +117,11 @@ NOTE: You should *always* examine the powershell script yourself before running 
 
 #### 1/13/21 Update
 
-* Added option to use a locally downloaded zip file to isntall from. This is handy if you are installing to a bunch of machines at a single location and the download links tend to throttle you.
+* Added option to use a locally downloaded zip file to install from. This is handy if you are installing to a bunch of machines at a single location and the download links tend to throttle you.
+
+#### 7/13/21 Update
+
+* Fixed regression with download code
+* Cleaned up documentation a bit
+* Fixed some bugs with the zip cleanup code
+* Updated some error handling code
